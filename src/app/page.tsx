@@ -14,10 +14,11 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Theme state: true = Dark Mode, false = Light Mode
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Mobile menu open/close state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileActiveCategory, setMobileActiveCategory] = useState<string | null>(null);
 
   // Pricing duration toggle state (false = monthly, true = annual)
   const [isAnnual, setIsAnnual] = useState(false);
@@ -28,13 +29,117 @@ export default function Home() {
   // Mega-menu and dropdown states
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'company' | 'licenses'>('company');
-  const [mobileBusinessMenuOpen, setMobileBusinessMenuOpen] = useState(false);
   const [activeComplianceTab, setActiveComplianceTab] = useState<'changes' | 'annual' | 'conversion'>('annual');
-  const [mobileComplianceMenuOpen, setMobileComplianceMenuOpen] = useState(false);
   const [activeIpTab, setActiveIpTab] = useState<'trademark' | 'copyright' | 'patent' | 'design' | 'dispute'>('trademark');
-  const [mobileIpMenuOpen, setMobileIpMenuOpen] = useState(false);
   const [activeTaxTab, setActiveTaxTab] = useState<'income-tax' | 'gst'>('income-tax');
-  const [mobileTaxMenuOpen, setMobileTaxMenuOpen] = useState(false);
+
+  // Mobile nav category data for drill-down navigation
+  const mobileNavCategories = [
+    {
+      key: 'business-registration',
+      label: 'Business Registration',
+      icon: 'M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z',
+      groups: [
+        {
+          title: 'Company Registration',
+          items: [
+            { name: 'Private Limited Company', href: '/private-limited-company-registration' },
+            { name: 'Limited Liability Partnership', href: '/limited-liability-partnership' },
+            { name: 'One Person Company', href: '/one-person-company' },
+            { name: 'Sole Proprietorship', href: '/sole-proprietorship' },
+            { name: 'Startup India Registration', href: '/startup-india-registration' },
+          ],
+        },
+        {
+          title: 'Licenses & Registrations',
+          items: [
+            { name: 'Digital Signature Certificate', href: '/digital-signature-certificate' },
+            { name: 'Udyam Registration', href: '/msme-registration' },
+            { name: 'MSME Registration', href: '/msme-registration' },
+            { name: 'FSSAI [Food License]', href: '/fssai-food-license' },
+            { name: 'IEC [Import/Export Code]', href: '/import-export-code' },
+          ],
+        },
+      ],
+    },
+    {
+      key: 'compliances',
+      label: 'Compliance',
+      icon: 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5',
+      groups: [
+        {
+          title: 'Annual Compliance',
+          items: [
+            { name: 'Annual Compliance for Private Limited Company', href: '/compliance/annual-pvt-ltd-compliance' },
+            { name: 'LLP Annual Compliance', href: '/compliance/llp-annual-compliance' },
+            { name: 'One Person Company Compliance', href: '/compliance/opc-annual-compliance' },
+          ],
+        },
+      ],
+    },
+    {
+      key: 'trademark-ip',
+      label: 'Trademark & IP',
+      icon: 'M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z',
+      groups: [
+        {
+          title: 'Trademark Registration',
+          items: [
+            { name: 'Trademark Registration', href: '/trademark-ip/trademark-registration' },
+          ],
+        },
+      ],
+    },
+    {
+      key: 'taxation',
+      label: 'Taxation',
+      icon: 'M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z',
+      groups: [
+        {
+          title: 'Income Tax',
+          items: [
+            { name: 'Income Tax E-Filing', href: '/taxation/income-tax-e-filing' },
+            { name: 'Business Tax Filing', href: '/taxation/business-tax-filing' },
+            { name: 'ITR-1 Return Filing', href: '/taxation/itr-1-return-filing' },
+            { name: 'ITR-2 Return Filing', href: '/taxation/itr-2-return-filing' },
+            { name: 'ITR-3 Return Filing', href: '/taxation/itr-3-return-filing' },
+            { name: 'ITR-4 Return Filing', href: '/taxation/itr-4-return-filing' },
+            { name: 'ITR-5 Return Filing', href: '/taxation/itr-5-return-filing' },
+            { name: 'ITR-6 Return Filing', href: '/taxation/itr-6-return-filing' },
+            { name: 'ITR-7 Return Filing', href: '/taxation/itr-7-return-filing' },
+            { name: '15CA - 15CB Filing', href: '/taxation/15ca-15cb-filing' },
+            { name: 'TAN Registration', href: '/taxation/tan-registration' },
+            { name: 'TDS Return Filing', href: '/taxation/tds-return-filing' },
+          ],
+        },
+        {
+          title: 'GST',
+          items: [
+            { name: 'GST Registration', href: '/taxation/gst-registration' },
+            { name: 'GST Return Filing', href: '/taxation/gst-return-filing' },
+            { name: 'GST Annual Return Filing (GSTR-9)', href: '/taxation/gst-annual-return-filing' },
+          ],
+        },
+      ],
+    },
+  ];
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+    setMobileActiveCategory(null);
+  };
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [mobileMenuOpen]);
+
   const [activeServiceTab, setActiveServiceTab] = useState(ALL_SERVICES_TABS[0].key);
   const [selectedService, setSelectedService] = useState('');
 
@@ -672,7 +777,7 @@ export default function Home() {
 
             {/* Mobile Menu Button */}
             <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => mobileMenuOpen ? closeMobileMenu() : setMobileMenuOpen(true)}
               className={`flex p-2 rounded-xl transition-colors duration-200 ${
                 isDarkMode ? 'text-slate-300 hover:text-white hover:bg-slate-900' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
@@ -693,221 +798,112 @@ export default function Home() {
         </div>
 
         {/* Mobile Navigation Dropdown */}
+        {/* Mobile Menu Drawer — Zolvit-style fullscreen drill-down */}
         {mobileMenuOpen && (
-          <div className={`lg:hidden border-t transition-colors duration-300 px-6 py-5 shadow-inner ${
-            isDarkMode ? 'border-slate-900 bg-slate-950' : 'border-slate-200 bg-white'
+          <div className={`lg:hidden fixed inset-x-0 top-[72px] z-40 h-[calc(100dvh-72px)] flex flex-col transition-colors duration-300 ${
+            isDarkMode ? 'bg-slate-950' : 'bg-[#f5f6f8]'
           }`}>
-            <div className="flex flex-col gap-4">
-              {/* Business Registration mobile accordion */}
-              <div>
+            {mobileActiveCategory === null ? (
+              /* Top-level list — Zolvit-style card rows */
+              <div key="list" className="animate-mobile-nav-list flex-1 overflow-y-auto px-4 pt-4 pb-28 flex flex-col gap-2.5">
+                {mobileNavCategories.map((cat) => (
+                  <button
+                    key={cat.key}
+                    onClick={() => setMobileActiveCategory(cat.key)}
+                    className={`flex w-full items-center gap-4 px-4 py-4 rounded-2xl border transition-all duration-150 cursor-pointer active:scale-[0.98] ${
+                      isDarkMode
+                        ? 'bg-slate-900/60 border-slate-800 hover:bg-slate-800/80'
+                        : 'bg-white border-slate-200/60 hover:bg-slate-50 shadow-sm'
+                    }`}
+                  >
+                    {/* Icon Container */}
+                    <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border ${
+                      isDarkMode
+                        ? 'bg-slate-800 border-slate-700'
+                        : 'bg-slate-100 border-slate-200'
+                    }`}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.75" stroke="currentColor" className={`h-6 w-6 ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d={cat.icon} />
+                      </svg>
+                    </span>
+
+                    {/* Label */}
+                    <span className={`flex-1 text-left text-[16px] font-semibold ${
+                      isDarkMode ? 'text-white' : 'text-slate-800'
+                    }`}>
+                      {cat.label}
+                    </span>
+
+                    {/* Chevron */}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="h-5 w-5 shrink-0 text-brand-orange">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              /* Category detail view — Zolvit-style drill-down */
+              <div key={mobileActiveCategory} className="animate-mobile-nav-detail flex-1 flex flex-col overflow-hidden">
+                {/* Back Header */}
                 <button
-                  onClick={() => setMobileBusinessMenuOpen(!mobileBusinessMenuOpen)}
-                  className={`flex w-full items-center justify-between text-base font-medium transition-colors duration-200 py-1 cursor-pointer ${
-                    isDarkMode ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'
-                  } ${mobileBusinessMenuOpen ? 'text-brand-orange' : ''}`}
+                  onClick={() => setMobileActiveCategory(null)}
+                  className={`flex items-center gap-2 w-full py-4 px-5 text-lg font-bold border-b shrink-0 cursor-pointer transition-colors ${
+                    isDarkMode ? 'border-slate-800 bg-slate-950 text-white' : 'border-slate-200 bg-white text-slate-900'
+                  }`}
                 >
-                  <span>Business Registration</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${mobileBusinessMenuOpen ? 'rotate-180 text-brand-orange' : ''}`}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="h-5 w-5 shrink-0 text-brand-orange">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                   </svg>
+                  <span>{mobileNavCategories.find((c) => c.key === mobileActiveCategory)?.label}</span>
                 </button>
 
-                {mobileBusinessMenuOpen && (
-                  <div className="mt-2 ml-4 flex flex-col gap-4 border-l border-slate-100 dark:border-slate-900 pl-4 py-1">
-                    {/* Company Registration Group */}
-                    <div>
-                      <h5 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
-                        Company Registration
-                      </h5>
-                      <div className="flex flex-col gap-2">
-                        {([
-                          { name: "Private Limited Company", href: "/private-limited-company-registration" },
-                          { name: "Limited Liability Partnership", href: "/limited-liability-partnership" },
-                          { name: "One Person Company", href: "/one-person-company" },
-                          { name: "Sole Proprietorship", href: "/sole-proprietorship" },
+                {/* Scrollable Items */}
+                <div className={`flex-1 overflow-y-auto pb-28 mobile-nav-scrollbar ${isDarkMode ? 'bg-slate-950' : 'bg-white'}`}>
+                  {mobileNavCategories
+                    .find((c) => c.key === mobileActiveCategory)
+                    ?.groups.map((group, groupIdx) => (
+                      <div key={group.title}>
+                        {/* Section Divider */}
+                        {groupIdx > 0 && (
+                          <div className={`mx-5 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`} />
+                        )}
 
-                          { name: "Startup India Registration", href: "/startup-india-registration" },
-                        ] as { name: string; href: string }[]).map(({ name, href }) => (
+                        {/* Section Title */}
+                        <h5 className={`text-base font-bold px-5 pt-6 pb-3 ${
+                          isDarkMode ? 'text-slate-200' : 'text-slate-900'
+                        }`}>
+                          {group.title}
+                        </h5>
+
+                        {/* Items */}
+                        {group.items.map(({ name, href }) => (
                           <a
                             key={name}
                             href={href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-brand-orange transition-colors"
+                            onClick={() => closeMobileMenu()}
+                            className={`block py-3.5 px-8 text-[15px] font-medium transition-colors ${
+                              isDarkMode ? 'text-slate-400 hover:text-white active:bg-slate-900' : 'text-slate-600 hover:text-slate-900 active:bg-slate-50'
+                            }`}
                           >
                             {name}
                           </a>
                         ))}
-                      </div>
-                    </div>
-
-                    {/* Licenses & Registrations Group */}
-                    <div>
-                      <h5 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
-                        Licenses & Registrations
-                      </h5>
-                      <div className="flex flex-col gap-2">
-                        {([
-                          { name: "Digital Signature Certificate", href: "/digital-signature-certificate" },
-                          { name: "Udyam Registration", href: "/msme-registration" },
-                          { name: "MSME Registration", href: "/msme-registration" },
-
-                          { name: "FSSAI [Food License]", href: "/fssai-food-license" },
-                          { name: "IEC [Import/Export Code]", href: "/import-export-code" },
-                        ] as { name: string; href: string }[]).map(({ name, href }) => (
-                          <a
-                            key={name}
-                            href={href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-brand-orange transition-colors"
-                          >
-                            {name}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Compliance mobile accordion */}
-              <div>
-                <button
-                  onClick={() => setMobileComplianceMenuOpen(!mobileComplianceMenuOpen)}
-                  className={`flex w-full items-center justify-between text-base font-medium transition-colors duration-200 py-1 cursor-pointer ${
-                    isDarkMode ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'
-                  } ${mobileComplianceMenuOpen ? 'text-brand-orange' : ''}`}
-                >
-                  <span>Compliance</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${mobileComplianceMenuOpen ? 'rotate-180 text-brand-orange' : ''}`}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                  </svg>
-                </button>
-
-                {mobileComplianceMenuOpen && (
-                  <div className="mt-2 ml-4 flex flex-col gap-4 border-l border-slate-100 dark:border-slate-900 pl-4 py-1">
-
-                    {/* Corporate Changes */}
-
-                    {/* Annual Compliance */}
-                    <div>
-                      <h5 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Annual Compliance</h5>
-                      <div className="flex flex-col gap-2">
-                        {([
-                          { name: 'Annual Compliance for Private Limited Company', href: '/compliance/annual-pvt-ltd-compliance' },
-                          { name: 'LLP Annual Compliance', href: '/compliance/llp-annual-compliance' },
-                          { name: 'One Person Company Compliance', href: '/compliance/opc-annual-compliance' },
-                        ] as { name: string; href: string }[]).map(({ name, href }) => (
-                          <a key={name} href={href} onClick={() => setMobileMenuOpen(false)}
-                            className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-brand-orange transition-colors">{name}</a>
-                        ))}
-                      </div>
-                    </div>
-
-                  </div>
-                )}
-              </div>
-
-              {/* Trademark & IP mobile accordion */}
-              <div>
-                <button
-                  onClick={() => setMobileIpMenuOpen(!mobileIpMenuOpen)}
-                  className={`flex w-full items-center justify-between text-base font-medium transition-colors duration-200 py-1 cursor-pointer ${
-                    isDarkMode ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'
-                  } ${mobileIpMenuOpen ? 'text-brand-orange' : ''}`}
-                >
-                  <span>Trademark & IP</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${mobileIpMenuOpen ? 'rotate-180 text-brand-orange' : ''}`}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                  </svg>
-                </button>
-
-                {mobileIpMenuOpen && (
-                  <div className="mt-2 ml-4 flex flex-col gap-4 border-l border-slate-100 dark:border-slate-900 pl-4 py-1">
-                    {[
-                      { title: 'Trademark Registration', items: [
-                        { name: 'Trademark Registration', href: '/trademark-ip/trademark-registration' },
-                      ]},
-
-                    ].map(({ title, items }) => (
-                      <div key={title}>
-                        <h5 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">{title}</h5>
-                        <div className="flex flex-col gap-2">
-                          {items.map(({ name, href }) => (
-                            <a key={name} href={href} onClick={() => setMobileMenuOpen(false)}
-                              className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-brand-orange transition-colors">{name}</a>
-                          ))}
-                        </div>
                       </div>
                     ))}
-                  </div>
-                )}
+                </div>
               </div>
+            )}
 
-              {/* Taxation mobile accordion */}
-              <div>
-                <button
-                  onClick={() => setMobileTaxMenuOpen(!mobileTaxMenuOpen)}
-                  className={`flex w-full items-center justify-between text-base font-medium transition-colors duration-200 py-1 cursor-pointer ${
-                    isDarkMode ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'
-                  } ${mobileTaxMenuOpen ? 'text-brand-orange' : ''}`}
-                >
-                  <span>Taxation</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${mobileTaxMenuOpen ? 'rotate-180 text-brand-orange' : ''}`}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                  </svg>
-                </button>
-
-                {mobileTaxMenuOpen && (
-                  <div className="mt-2 ml-4 flex flex-col gap-4 border-l border-slate-100 dark:border-slate-900 pl-4 py-1">
-                    <div>
-                      <h5 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Income Tax</h5>
-                      <div className="flex flex-col gap-2">
-                        {[
-                          { name: 'Income Tax E-Filing', href: '/taxation/income-tax-e-filing' },
-                          { name: 'Business Tax Filing', href: '/taxation/business-tax-filing' },
-                          { name: 'ITR-1 Return Filing', href: '/taxation/itr-1-return-filing' },
-                          { name: 'ITR-2 Return Filing', href: '/taxation/itr-2-return-filing' },
-                          { name: 'ITR-3 Return Filing', href: '/taxation/itr-3-return-filing' },
-                          { name: 'ITR-4 Return Filing', href: '/taxation/itr-4-return-filing' },
-                          { name: 'ITR-5 Return Filing', href: '/taxation/itr-5-return-filing' },
-                          { name: 'ITR-6 Return Filing', href: '/taxation/itr-6-return-filing' },
-                          { name: 'ITR-7 Return Filing', href: '/taxation/itr-7-return-filing' },
-                          { name: '15CA - 15CB Filing', href: '/taxation/15ca-15cb-filing' },
-                          { name: 'TAN Registration', href: '/taxation/tan-registration' },
-                          { name: 'TDS Return Filing', href: '/taxation/tds-return-filing' },
-                        ].map(({ name, href }) => (
-                          <a key={name} href={href} onClick={() => setMobileMenuOpen(false)}
-                            className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-brand-orange transition-colors">{name}</a>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <h5 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">GST</h5>
-                      <div className="flex flex-col gap-2">
-                        {[
-                          { name: 'GST Registration', href: '/taxation/gst-registration' },
-                          { name: 'GST Return Filing', href: '/taxation/gst-return-filing' },
-                          { name: 'GST Annual Return Filing (GSTR-9)', href: '/taxation/gst-annual-return-filing' },
-                        ].map(({ name, href }) => (
-                          <a key={name} href={href} onClick={() => setMobileMenuOpen(false)}
-                            className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-brand-orange transition-colors">{name}</a>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="h-px bg-slate-200 dark:bg-slate-900 my-2" />
-              
-              {/* Mobile Actions */}
-              
+            {/* Sticky Bottom CTA */}
+            <div className={`shrink-0 px-4 py-3 border-t ${
+              isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200'
+            }`}>
               <a
                 href="tel:+917337750923"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-orange py-3 text-center text-sm font-semibold text-white shadow-md hover:bg-orange-600 transition-colors"
+                onClick={() => closeMobileMenu()}
+                className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-brand-orange py-3.5 text-center text-[15px] font-semibold text-white shadow-lg shadow-orange-500/25 hover:bg-orange-600 active:scale-[0.98] transition-all duration-150"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
                   <path fillRule="evenodd" d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-1.052 1.767l-.933.267c-.41.117-.643.555-.48 1.002a28.09 28.09 0 0013.11 13.11c.447.163.885-.07 1.002-.48l.267-.933a1.5 1.5 0 011.767-1.052l3.223.716A1.5 1.5 0 0118 18.5V20a1.5 1.5 0 01-1.5 1.5 20 20 0 01-20-20A1.5 1.5 0 012 3.5z" clipRule="evenodd" />
                 </svg>
                 <span>Talk to Experts</span>
@@ -976,54 +972,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trusted By Section (Marquee) */}
-      <section className={`py-12 border-b transition-colors duration-300 overflow-hidden ${
-        isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'
-      }`}>
-        <div className="max-w-7xl mx-auto px-6 mb-8 text-center">
-          <p className="text-xs font-bold tracking-widest uppercase text-slate-400">
-            Trusted by businesses registered across platforms
-          </p>
-        </div>
-        <div className="relative flex overflow-x-hidden group">
-          <div className="animate-marquee flex whitespace-nowrap items-center group-hover:[animation-play-state:paused]">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className="flex gap-16 px-8 items-center justify-around w-max">
-                <div className={`flex items-center justify-center font-sans transition duration-300 ${isDarkMode ? 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100' : 'grayscale opacity-70 hover:grayscale-0 hover:opacity-100'}`}>
-                  <span className="font-extrabold text-[#b32025] tracking-tight text-2xl mr-1">ICICI</span> <span className="font-semibold text-slate-500 text-2xl">Bank</span>
-                </div>
-                <div className={`flex items-center justify-center font-sans transition duration-300 ${isDarkMode ? 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100' : 'grayscale opacity-70 hover:grayscale-0 hover:opacity-100'}`}>
-                  <span className="font-extrabold text-white bg-[#004b8f] px-2 py-0.5 rounded-sm mr-1.5 text-xl tracking-tight">HDFC</span><span className="font-extrabold text-[#b32025] text-xl">BANK</span>
-                </div>
-                <div className={`flex items-center justify-center font-sans transition duration-300 ${isDarkMode ? 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100' : 'grayscale opacity-70 hover:grayscale-0 hover:opacity-100'}`}>
-                  <span className="font-bold text-3xl tracking-tighter" style={{ color: isDarkMode ? '#fff' : '#000' }}>amazon</span>
-                </div>
-                <div className={`flex items-center justify-center font-sans transition duration-300 ${isDarkMode ? 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100' : 'grayscale opacity-70 hover:grayscale-0 hover:opacity-100'}`}>
-                  <span className="font-bold text-[#2874f0] italic text-3xl">Flipkart</span>
-                </div>
-                <div className={`flex items-center justify-center font-sans transition duration-300 ${isDarkMode ? 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100' : 'grayscale opacity-70 hover:grayscale-0 hover:opacity-100'}`}>
-                  <span className="font-extrabold text-[#673de6] text-2xl tracking-tighter">HOSTINGER</span>
-                </div>
-                <div className={`flex items-center justify-center font-sans transition duration-300 ${isDarkMode ? 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100' : 'grayscale opacity-70 hover:grayscale-0 hover:opacity-100'}`}>
-                  <span className="font-bold text-3xl"><span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">o</span><span className="text-[#FBBC05]">o</span><span className="text-[#4285F4]">g</span><span className="text-[#34A853]">l</span><span className="text-[#EA4335]">e</span></span>
-                </div>
-                <div className={`flex items-center justify-center font-sans transition duration-300 ${isDarkMode ? 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100' : 'grayscale opacity-70 hover:grayscale-0 hover:opacity-100'}`}>
-                  <span className="font-extrabold text-3xl tracking-widest" style={{ color: isDarkMode ? '#fff' : '#000' }}>ZOHO</span>
-                </div>
-                <div className={`flex items-center justify-center font-sans transition duration-300 ${isDarkMode ? 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100' : 'grayscale opacity-70 hover:grayscale-0 hover:opacity-100'}`}>
-                  <span className="font-bold text-2xl text-[#0b5cff]">Razorpay</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Gradient overlays for smooth fading edges */}
-          <div className={`absolute inset-y-0 left-0 w-24 bg-gradient-to-r transition-colors duration-300 to-transparent pointer-events-none ${isDarkMode ? 'from-slate-950' : 'from-slate-50'}`}></div>
-          <div className={`absolute inset-y-0 right-0 w-24 bg-gradient-to-l transition-colors duration-300 to-transparent pointer-events-none ${isDarkMode ? 'from-slate-950' : 'from-slate-50'}`}></div>
-        </div>
-      </section>
-
       {/* All Services Section */}
-      <section id="all-services" className={`pt-4 pb-10 lg:pt-6 lg:pb-16 transition-colors duration-300 ${
+      <section id="all-services" className={`pt-10 pb-10 lg:pt-14 lg:pb-16 transition-colors duration-300 ${
         isDarkMode ? 'bg-slate-950' : 'bg-white'
       }`}>
         <div className="mx-auto max-w-7xl px-6">

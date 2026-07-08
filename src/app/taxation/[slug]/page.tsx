@@ -15,7 +15,7 @@ export default function DynamicPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const params = useParams();
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   

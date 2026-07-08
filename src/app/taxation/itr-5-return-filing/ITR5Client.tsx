@@ -167,7 +167,7 @@ function DataTable({ headers, rows, dm }: { headers: string[]; rows: string[][];
 
 export default function ITR5Client() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [state, formAction, pending] = useActionState(submitLead, { success: undefined, message: '', errors: {} });

@@ -380,19 +380,13 @@ function DataTable({ headers, rows, dm }: { headers: string[]; rows: string[][];
 
 export default function LLPClient() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [state, formAction, pending] = useActionState(submitLead, { success: undefined, message: '', errors: {} });
   const formRef = useRef<HTMLFormElement>(null);
 
   const dm = isDarkMode;
-
-  useEffect(() => {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setIsDarkMode(true);
-    }
-  }, []);
 
   useEffect(() => {
     if (state?.success) {

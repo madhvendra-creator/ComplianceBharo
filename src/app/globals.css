@@ -27,15 +27,40 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+@keyframes mobile-nav-slide-in-right {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-.animate-marquee {
-  animation: marquee 30s linear infinite;
+@keyframes mobile-nav-slide-in-left {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-mobile-nav-detail {
+  animation: mobile-nav-slide-in-right 0.18s ease-out;
+}
+
+.animate-mobile-nav-list {
+  animation: mobile-nav-slide-in-left 0.18s ease-out;
+}
+
+/* Visible scrollbar for mobile nav detail view */
+.mobile-nav-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.mobile-nav-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+.mobile-nav-scrollbar::-webkit-scrollbar-thumb {
+  background: #c4c8cc;
+  border-radius: 100px;
+}
+.mobile-nav-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+.mobile-nav-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #c4c8cc transparent;
 }

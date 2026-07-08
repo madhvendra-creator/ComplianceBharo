@@ -108,7 +108,7 @@ function DataTable({ headers, rows, dm }: { headers: string[]; rows: string[][];
 export default function DigitalSignatureCertificatePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [activeSection, setActiveSection] = useState('overview');
   const [tokenEnabled, setTokenEnabled] = useState<boolean[]>([false, false, false]);

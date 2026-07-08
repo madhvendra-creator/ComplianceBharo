@@ -87,7 +87,7 @@ const faqs = [
 export default function NidhiCompanyPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [state, formAction, pending] = useActionState(submitLead, { success: undefined, message: '', errors: {} });
   const formRef = useRef<HTMLFormElement>(null);
