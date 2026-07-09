@@ -73,6 +73,8 @@ export default function Home() {
             { name: 'Annual Compliance for Private Limited Company', href: '/compliance/annual-pvt-ltd-compliance' },
             { name: 'LLP Annual Compliance', href: '/compliance/llp-annual-compliance' },
             { name: 'One Person Company Compliance', href: '/compliance/opc-annual-compliance' },
+            { name: 'Accounting Services', href: '/compliance/accounting-services' },
+            { name: 'Bookkeeping Services', href: '/compliance/bookkeeping-services' },
           ],
         },
       ],
@@ -458,6 +460,8 @@ export default function Home() {
                             { name: 'Annual Compliance for Private Limited Company', href: '/compliance/annual-pvt-ltd-compliance' },
                             { name: 'LLP Annual Compliance', href: '/compliance/llp-annual-compliance' },
                             { name: 'One Person Company Compliance', href: '/compliance/opc-annual-compliance' },
+                            { name: 'Accounting Services', href: '/compliance/accounting-services' },
+                            { name: 'Bookkeeping Services', href: '/compliance/bookkeeping-services' },
                           ] as { name: string; href: string }[]).map(({ name, href }) => (
                             <a key={name} href={href} onClick={() => setActiveMenu(null)}
                               className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-brand-orange transition-colors py-0.5 flex items-center gap-2 group/item">
