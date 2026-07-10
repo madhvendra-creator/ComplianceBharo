@@ -5,7 +5,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
+      disallow: ['/api/', '/admin/'],
     },
     sitemap: 'https://compliancebharo.com/sitemap.xml',
+    host: 'https://compliancebharo.com',
   };
 }

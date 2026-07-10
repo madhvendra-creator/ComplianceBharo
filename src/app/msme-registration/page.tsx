@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     'NIC code for Udyam',
     'ComplianceBharo Udyam registration',
   ],
+  alternates: {
+    canonical: 'https://compliancebharo.com/msme-registration',
+  },
   openGraph: {
     title: 'Udyam Registration Online - MSME Certificate From ₹499 | ComplianceBharo',
     description:
@@ -26,5 +29,47 @@ export const metadata: Metadata = {
 };
 
 export default function MsmeRegistrationPage() {
-  return <MSMEClient />;
+  
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Service',
+        name: 'MSME Registration',
+        provider: {
+          '@type': 'Organization',
+          name: 'Compliance Bharo',
+          url: 'https://compliancebharo.com',
+        },
+        url: 'https://compliancebharo.com/msme-registration',
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://compliancebharo.com',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'MSME Registration',
+            item: 'https://compliancebharo.com/msme-registration',
+          },
+        ],
+      }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <MSMEClient />
+    </>
+  );
 }

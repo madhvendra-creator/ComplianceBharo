@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     'single person company India',
     'ComplianceBharo OPC registration',
   ],
+  alternates: {
+    canonical: 'https://compliancebharo.com/one-person-company',
+  },
   openGraph: {
     title: 'One Person Company (OPC) Registration - ₹2,299 | ComplianceBharo',
     description:

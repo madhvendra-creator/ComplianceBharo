@@ -30,6 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   sitemapEntries.push({
     url: BASE_URL,
     lastModified: new Date(),
+    changeFrequency: 'daily',
     priority: 1.0,
   });
 
@@ -41,7 +42,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     sitemapEntries.push({
       url: `${BASE_URL}${route}`,
       lastModified: new Date(),
-      priority: 0.8,
+      changeFrequency: 'weekly',
+      priority: 0.9,
     });
   });
 
@@ -51,6 +53,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     sitemapEntries.push({
       url: `${BASE_URL}/compliance/${slug}`,
       lastModified: new Date(),
+      changeFrequency: 'weekly',
       priority: 0.8,
     });
   });
@@ -60,6 +63,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     sitemapEntries.push({
       url: `${BASE_URL}/taxation/${slug}`,
       lastModified: new Date(),
+      changeFrequency: 'weekly',
       priority: 0.8,
     });
   });
@@ -69,6 +73,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     sitemapEntries.push({
       url: `${BASE_URL}/trademark-ip/${slug}`,
       lastModified: new Date(),
+      changeFrequency: 'weekly',
       priority: 0.8,
     });
   });

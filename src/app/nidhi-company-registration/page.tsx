@@ -1,271 +1,63 @@
-'use client';
+import type { Metadata } from 'next';
+import NidhiCompanyClient from './NidhiCompanyClient';
 
-import React, { useState, useActionState, useEffect, useRef } from 'react';
-import Modal from '../components/Modal';
-import LeadForm from '../components/LeadForm';
-import PopupForm from '../components/PopupForm';
-import Link from 'next/link';
-import { submitLead } from '../actions';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-
-const documents = [
-  { icon: '🪪', label: 'PAN Card', desc: 'All proposed directors (min 3)' },
-  { icon: '📋', label: 'Aadhaar Card', desc: 'Identity & address proof for directors' },
-  { icon: '📸', label: 'Passport Photo', desc: 'All directors, white background' },
-  { icon: '✍️', label: 'Specimen Signature', desc: 'Signed on plain white paper' },
-  { icon: '🏠', label: 'Office Address Proof', desc: 'Electricity bill or rental agreement' },
-  { icon: '📄', label: 'NOC from Owner', desc: 'If registered office address is rented' },
-  { icon: '🏦', label: 'Bank Statement', desc: 'Last 2 months for all directors' },
-  { icon: '📝', label: 'Name Preferences', desc: '2–3 names ending with "Nidhi Limited"' },
-];
-
-const workflow = [
-  { step: '01', title: 'Name Reservation', desc: 'Reserve name ending in "Nidhi Limited" via RUN form on MCA portal. Name cannot be identical or deceptively similar to existing companies.' },
-  { step: '02', title: 'DSC & DIN', desc: 'Obtain Digital Signature Certificates and Director Identification Numbers for all directors.' },
-  { step: '03', title: 'MOA & AOA Drafting', desc: 'Draft Memorandum and Articles of Association complying with Nidhi Rules, 2014 and Section 406 of Companies Act.' },
-  { step: '04', title: 'MCA SPICe+ Filing', desc: 'File integrated incorporation form with all director documents, office proof, and declarations.' },
-  { step: '05', title: 'Certificate Issued', desc: 'Receive Certificate of Incorporation; achieve 200-member minimum within 1 year post-incorporation to maintain Nidhi status.' },
-];
-
-const plans = [
-  {
-    name: 'Starter',
-    price: 9999,
-    desc: 'For first-time Nidhi promoters',
-    popular: false,
-    features: [
-      'MCA Name Reservation (RUN)',
-      'DSC for 3 Directors',
-      'DIN for 3 Directors',
-      'MOA & AOA (Nidhi Rules 2014)',
-      'MCA SPICe+ Filing',
-      'Certificate of Incorporation',
-      'Company PAN & TAN',
-    ],
+export const metadata: Metadata = {
+  title: 'Nidhi Company Registration | ComplianceBharo',
+  description: 'Expert assistance for Nidhi Company Registration. Fast, reliable, and affordable services by ComplianceBharo.',
+  keywords: ['nidhi company registration', 'compliance bharo', 'registration', 'online', 'India'],
+  alternates: {
+    canonical: 'https://compliancebharo.com/nidhi-company-registration',
   },
-  {
-    name: 'Standard',
-    price: 11999,
-    desc: 'Most popular for Nidhi setup',
-    popular: true,
-    features: [
-      'Everything in Starter, plus...',
-      'GST Registration',
-      'Bank Account Opening Assist',
-      'Nidhi Rules Compliance Checklist',
-      'NDH-1 Return Filing Guide',
-      'Member Register Setup',
-      'Share Certificate Templates',
-    ],
+  openGraph: {
+    title: 'Nidhi Company Registration | ComplianceBharo',
+    description: 'Expert assistance for Nidhi Company Registration. Fast, reliable, and affordable services by ComplianceBharo.',
+    url: 'https://compliancebharo.com/nidhi-company-registration',
+    type: 'website',
   },
-  {
-    name: 'Pro',
-    price: 24999,
-    desc: 'Full Nidhi compliance suite',
-    popular: false,
-    features: [
-      'Everything in Standard, plus...',
-      'MSME / Udyam Registration',
-      'NDH-3 Half-Yearly Filing (1 yr)',
-      'RBI Exemption Declaration Filing',
-      'First Board Meeting Minutes',
-      'Dedicated CS / CA Manager',
-      'Priority Support & Response',
-    ],
-  },
-];
+};
 
-const faqs = [
-  { q: 'What is a Nidhi Company?', a: 'A Nidhi Company is a type of Non-Banking Financial Company (NBFC) recognized under Section 406 of the Companies Act, 2013. Its sole objective is to cultivate the habit of savings among its members and lend money exclusively to its members — creating a closed, community-driven financial ecosystem with no external borrowings permitted.' },
-  { q: 'Is RBI approval required to incorporate a Nidhi Company?', a: 'No prior RBI approval is required to incorporate a Nidhi Company. However, Nidhi Companies must comply with Nidhi Rules, 2014 and file NDH-1 within 90 days of year-end confirming compliance (200 members, ₹10 lakh paid-up capital, 1:20 NOF-to-deposits ratio). Registration as an NBFC with RBI is not required.' },
-  { q: 'What are the operational restrictions on a Nidhi Company?', a: 'Nidhi Companies can only accept deposits from and lend to their own members. They cannot open current accounts for members, issue preference shares, admit a body corporate as a member, pay brokerage on deposits, or undertake hire-purchase, insurance, or chit fund activities. All deposits and loans must be exclusively with and to members.' },
-  { q: 'How many members are required to operate a Nidhi Company?', a: 'A Nidhi Company must have a minimum of 3 directors at incorporation. Within 1 year of incorporation, it must have at least 200 members, ₹10 lakhs in paid-up equity capital, and maintain a Net Owned Funds to Deposits ratio of no more than 1:20. NDH-4 must be filed to declare compliance with these thresholds.' },
-  { q: 'What is the maximum deposit a Nidhi Company can accept?', a: 'A Nidhi Company may only accept deposits from its own members — not from the general public. Fixed deposits cannot exceed 10% per annum interest. Recurring deposits cannot exceed 1 year term with 15% per annum interest. Total deposits are capped at 20 times the Net Owned Funds at any given point in time.' },
-];
-
-export default function NidhiCompanyPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [activeFaq, setActiveFaq] = useState<number | null>(null);
-  const [state, formAction, pending] = useActionState(submitLead, { success: undefined, message: '', errors: {} });
-  const formRef = useRef<HTMLFormElement>(null);
-  useEffect(() => { if (state?.success) formRef.current?.reset(); }, [state]);
-
-  const dm = isDarkMode;
+export default function Page() {
+  
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Service',
+        name: 'Nidhi Company Registration',
+        provider: {
+          '@type': 'Organization',
+          name: 'Compliance Bharo',
+          url: 'https://compliancebharo.com',
+        },
+        url: 'https://compliancebharo.com/nidhi-company-registration',
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://compliancebharo.com',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Nidhi Company Registration',
+            item: 'https://compliancebharo.com/nidhi-company-registration',
+          },
+        ],
+      }
+    ]
+  };
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 font-sans antialiased selection:bg-brand-orange selection:text-white ${dm ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
-
-      <Navbar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} breadcrumb="Nidhi Company" />
-
-      {/* Hero */}
-      <section className="relative overflow-hidden pt-12 pb-16 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.08),rgba(255,255,255,0))]">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-start">
-            <div className="lg:col-span-7 flex flex-col gap-6">
-              <div className={`inline-flex self-start items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${dm ? 'border-orange-500/25 bg-orange-500/5 text-brand-orange' : 'border-orange-500/35 bg-orange-500/10 text-orange-600'}`}>
-                🏦 RBI Exempted NBFC — MCA Registered in 7–10 Days
-              </div>
-              <h1 className={`text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl ${dm ? 'text-white' : 'text-slate-900'}`}>
-                Nidhi Company<br />
-                <span className="bg-gradient-to-r from-orange-400 to-amber-500 bg-clip-text text-transparent">Registration</span>
-              </h1>
-              <p className={`max-w-xl text-lg leading-relaxed ${dm ? 'text-slate-300' : 'text-slate-600'}`}>
-                A Nidhi Company is a Mutual Benefit Society incorporated under Section 406 of the Companies Act, 2013. Cultivate community savings, lend exclusively to members, and operate with significant RBI regulatory exemptions — all registered online.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
-                {[
-                  { title: 'Mutual Benefit Society', desc: 'Accept deposits and lend only to members — a closed, community-driven financial ecosystem.' },
-                  { title: 'RBI Exemption', desc: 'Nidhi Companies are exempt from core RBI NBFC regulations, reducing regulatory overhead.' },
-                  { title: 'Low Entry Capital', desc: 'Start with ₹10 lakhs minimum paid-up equity capital and grow through member deposits.' },
-                  { title: 'Community Trust', desc: 'Members interact with a registered MCA entity, building financial credibility locally.' },
-                ].map((f, i) => (
-                  <div key={i} className={`flex gap-3 items-start p-3 rounded-xl border ${dm ? 'bg-slate-900/30 border-slate-900/50' : 'bg-white border-slate-200 shadow-sm'}`}>
-                    <span className="flex h-5 w-5 mt-0.5 shrink-0 items-center justify-center rounded-full bg-orange-500/10 text-brand-orange">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5"><path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" /></svg>
-                    </span>
-                    <div>
-                      <p className={`text-sm font-semibold ${dm ? 'text-slate-100' : 'text-slate-800'}`}>{f.title}</p>
-                      <p className={`text-xs mt-0.5 ${dm ? 'text-slate-400' : 'text-slate-500'}`}>{f.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            
-            <div id="lead-form" className="lg:col-span-5 relative lg:ml-8 mt-12 lg:mt-0">
-
-
-            
-              <LeadForm serviceName={"Consultation"} dm={isDarkMode} />
-
-
-            
-            </div>
-
-
-            
-          </div>
-
-
-            
-        </div>
-
-
-            
-      </section>
-
-      {/* Documents */}
-      <section className={`py-16 border-y transition-colors duration-300 ${dm ? 'border-slate-900 bg-slate-900/20' : 'border-slate-200 bg-slate-100/50'}`}>
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-10 text-center">
-            <h2 className="text-base font-semibold text-brand-orange uppercase tracking-wider">Checklist</h2>
-            <p className={`mt-2 text-2xl font-bold tracking-tight ${dm ? 'text-white' : 'text-slate-900'}`}>Documents Required</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {documents.map((doc, i) => (
-              <div key={i} className={`flex flex-col gap-2 p-4 rounded-xl border text-center transition-all ${dm ? 'border-slate-800 bg-slate-900/30 hover:border-slate-700' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'}`}>
-                <span className="text-2xl">{doc.icon}</span>
-                <p className={`text-sm font-semibold ${dm ? 'text-slate-100' : 'text-slate-800'}`}>{doc.label}</p>
-                <p className={`text-xs ${dm ? 'text-slate-500' : 'text-slate-500'}`}>{doc.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Workflow */}
-      <section className="py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-10 text-center">
-            <h2 className="text-base font-semibold text-brand-orange uppercase tracking-wider">Process</h2>
-            <p className={`mt-2 text-2xl font-bold tracking-tight ${dm ? 'text-white' : 'text-slate-900'}`}>How It Works</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-            {workflow.map((s, i) => (
-              <div key={i} className="flex flex-col items-center text-center gap-3">
-                <span className={`flex h-12 w-12 items-center justify-center rounded-2xl border text-sm font-bold text-brand-orange ${dm ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>{s.step}</span>
-                <p className={`text-sm font-bold ${dm ? 'text-white' : 'text-slate-900'}`}>{s.title}</p>
-                <p className={`text-xs leading-relaxed ${dm ? 'text-slate-400' : 'text-slate-500'}`}>{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section className={`py-16 border-y transition-colors duration-300 ${dm ? 'border-slate-900 bg-slate-900/20' : 'border-slate-200 bg-slate-100/50'}`}>
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-10 text-center">
-            <h2 className="text-base font-semibold text-brand-orange uppercase tracking-wider">Pricing</h2>
-            <p className={`mt-2 text-2xl font-bold tracking-tight ${dm ? 'text-white' : 'text-slate-900'}`}>Transparent Plans</p>
-          </div>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-stretch">
-            {plans.map((plan, i) => (
-              <div key={i} className={`relative flex flex-col justify-between rounded-2xl border p-7 transition-all duration-300 ${plan.popular ? `border-2 border-brand-orange shadow-xl shadow-orange-500/5 ${dm ? 'bg-slate-900/30' : 'bg-white shadow-lg'}` : dm ? 'border-slate-900 bg-slate-900/15 hover:border-slate-800' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'}`}>
-                {plan.popular && <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-brand-orange px-4 py-1 text-xs font-bold text-white uppercase">Most Popular</span>}
-                <div>
-                  <p className={`text-lg font-bold ${dm ? 'text-white' : 'text-slate-900'}`}>{plan.name}</p>
-                  <p className={`text-sm mt-1 ${dm ? 'text-slate-400' : 'text-slate-500'}`}>{plan.desc}</p>
-                  <div className={`mt-4 flex items-baseline gap-1 ${dm ? 'text-white' : 'text-slate-900'}`}>
-                    <span className={`font-extrabold ${plan.popular ? 'text-4xl' : 'text-3xl'}`}>₹{plan.price.toLocaleString('en-IN')}</span>
-                    <span className="text-sm text-slate-400">one-time</span>
-                  </div>
-                  <ul className={`mt-6 space-y-3 text-sm ${dm ? 'text-slate-300' : 'text-slate-600'}`}>
-                    {plan.features.map((f, fi) => (
-                      <li key={fi} className="flex gap-2 items-start">
-                        <span className="text-brand-orange shrink-0 mt-0.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" /></svg></span>
-                        <span className={fi === 0 && plan.popular ? `font-semibold ${dm ? 'text-slate-100' : 'text-slate-900'}` : ''}>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-7">
-                  <a href="#" onClick={(e) => { e.preventDefault(); setIsModalOpen(true); }} className={`flex items-center justify-center rounded-xl py-3 text-sm font-semibold transition-all ${plan.popular ? 'bg-brand-orange hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20' : dm ? 'bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white' : 'bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-800'}`}>Get Started</a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="py-16">
-        <div className="mx-auto max-w-3xl px-6">
-          <div className="mb-10 text-center">
-            <h2 className="text-base font-semibold text-brand-orange uppercase tracking-wider">FAQ</h2>
-            <p className={`mt-2 text-2xl font-bold tracking-tight ${dm ? 'text-white' : 'text-slate-900'}`}>Common Questions</p>
-          </div>
-          <div className={`divide-y border rounded-2xl p-4 ${dm ? 'divide-slate-900 border-slate-900 bg-slate-950/40' : 'divide-slate-200 border-slate-200 bg-white shadow-sm'}`}>
-            {faqs.map((faq, i) => (
-              <div key={i} className="py-4 first:pt-2 last:pb-2">
-                <button onClick={() => setActiveFaq(activeFaq === i ? null : i)} className="flex w-full items-center justify-between text-left font-semibold py-2 focus:outline-none cursor-pointer">
-                  <span className={dm ? 'text-white' : 'text-slate-800'}>{faq.q}</span>
-                  <span className={`ml-4 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border transition-transform ${activeFaq === i ? 'rotate-180 text-brand-orange' : 'text-slate-400'} ${dm ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="h-3.5 w-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
-                  </span>
-                </button>
-                <div className={`overflow-hidden transition-all duration-300 max-h-0 ${activeFaq === i ? 'max-h-48 mt-2' : ''}`}>
-                  <p className={`text-sm pr-8 leading-relaxed ${dm ? 'text-slate-400' : 'text-slate-500'}`}>{faq.a}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <Footer isDarkMode={dm} />
-
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <PopupForm
-          serviceName="Nidhi Company"
-          onClose={() => setIsModalOpen(false)}
-        />
-      </Modal>
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <NidhiCompanyClient />
+    </>
   );
 }

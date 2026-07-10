@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     'convert proprietorship to Pvt Ltd',
     'ComplianceBharo sole proprietorship',
   ],
+  alternates: {
+    canonical: 'https://compliancebharo.com/sole-proprietorship',
+  },
   openGraph: {
     title: 'Sole Proprietorship Registration Online - ₹999 | ComplianceBharo',
     description:
@@ -26,5 +29,47 @@ export const metadata: Metadata = {
 };
 
 export default function SoleProprietorshipPage() {
-  return <SoleProprietorshipClient />;
+  
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Service',
+        name: 'Sole Proprietorship',
+        provider: {
+          '@type': 'Organization',
+          name: 'Compliance Bharo',
+          url: 'https://compliancebharo.com',
+        },
+        url: 'https://compliancebharo.com/sole-proprietorship',
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://compliancebharo.com',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Sole Proprietorship',
+            item: 'https://compliancebharo.com/sole-proprietorship',
+          },
+        ],
+      }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <SoleProprietorshipClient />
+    </>
+  );
 }

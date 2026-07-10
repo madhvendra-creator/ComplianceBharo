@@ -169,7 +169,7 @@ export default function ClientReviews({ isDarkMode }: { isDarkMode: boolean }) {
                     review.image ? '' : (review.avatarBg || 'bg-brand-orange text-white')
                   }`}>
                     {review.image ? (
-                      <img src={review.image} alt={review.name} className="w-full h-full object-cover" />
+                      <img src={review.image} alt={review.name} title={review.name} loading="lazy" className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-white">{review.avatar}</span>
                     )}

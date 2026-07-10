@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     'LLPIN registration',
     'ComplianceBharo LLP registration',
   ],
+  alternates: {
+    canonical: 'https://compliancebharo.com/limited-liability-partnership',
+  },
   openGraph: {
     title: 'LLP Registration Online - ₹2,499 | ComplianceBharo',
     description:

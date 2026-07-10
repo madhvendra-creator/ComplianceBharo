@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     'Fund of Funds for Startups',
     'ComplianceBharo Startup India',
   ],
+  alternates: {
+    canonical: 'https://compliancebharo.com/startup-india-registration',
+  },
   openGraph: {
     title: 'Startup India / DPIIT Registration - ₹999 | ComplianceBharo',
     description:
@@ -26,5 +29,47 @@ export const metadata: Metadata = {
 };
 
 export default function StartupIndiaPage() {
-  return <StartupIndiaClient />;
+  
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Service',
+        name: 'Startup India Registration',
+        provider: {
+          '@type': 'Organization',
+          name: 'Compliance Bharo',
+          url: 'https://compliancebharo.com',
+        },
+        url: 'https://compliancebharo.com/startup-india-registration',
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://compliancebharo.com',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Startup India Registration',
+            item: 'https://compliancebharo.com/startup-india-registration',
+          },
+        ],
+      }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <StartupIndiaClient />
+    </>
+  );
 }

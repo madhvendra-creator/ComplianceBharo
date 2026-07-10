@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     'DIN DSC registration',
     'ComplianceBharo company registration',
   ],
+  alternates: {
+    canonical: 'https://compliancebharo.com/private-limited-company-registration',
+  },
   openGraph: {
     title: 'Private Limited Company Registration - ₹2,499 | ComplianceBharo',
     description:
@@ -26,5 +29,47 @@ export const metadata: Metadata = {
 };
 
 export default function PrivateLimitedCompanyPage() {
-  return <PrivateLimitedClient />;
+  
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Service',
+        name: 'Private Limited Company Registration',
+        provider: {
+          '@type': 'Organization',
+          name: 'Compliance Bharo',
+          url: 'https://compliancebharo.com',
+        },
+        url: 'https://compliancebharo.com/private-limited-company-registration',
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://compliancebharo.com',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Private Limited Company Registration',
+            item: 'https://compliancebharo.com/private-limited-company-registration',
+          },
+        ],
+      }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <PrivateLimitedClient />
+    </>
+  );
 }
