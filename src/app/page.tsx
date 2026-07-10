@@ -936,7 +936,7 @@ export default function Home() {
               <p className={`mx-auto lg:mx-0 max-w-xl text-lg leading-relaxed transition-colors duration-300 ${
                 isDarkMode ? 'text-slate-300' : 'text-slate-600'
               }`}>
-                Get your Private Limited Company Registration in just <span className="font-bold text-[#1e4b65] dark:text-sky-400">7 days</span> at <span className="text-orange-400 font-extrabold text-xl lg:text-2xl">Rs.2,499/-</span> only.
+                Get your Private Limited Company Registration in just <span className="font-bold text-[#1e4b65] dark:text-sky-400">10 days</span> at <span className="text-orange-400 font-extrabold text-xl lg:text-2xl">Rs.2,499/-</span> only.
               </p>
 
               {/* Bulleted Value Props */}
